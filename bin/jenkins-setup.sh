@@ -39,7 +39,7 @@ for CLUSTER_ID in $CLUSTERS; do
     DOCKER=$(echo $SERVICE | tr '@' '-')
     env $TUNNEL fleetctl ssh $SERVICE "docker exec $DOCKER git config --global user.name $JENKINS_USER"
     env $TUNNEL fleetctl ssh $SERVICE "docker exec $DOCKER git config --global user.email $JENKINS_EMAIL"
-    env $TUNNEL fleetctl ssh $SERVICE "docker exec $DOCKER echo https://$JENKINS_USER:$JENKINS_PASS@github.com > .git-credentials"
+    env $TUNNEL fleetctl ssh $SERVICE "docker exec $DOCKER /bin/bash -c \"echo https://$JENKINS_USER:$JENKINS_PASS@github.com > /opt/jenkins/.git-credentials\""
     echo "Done"
   done
 done
