@@ -1,2 +1,1 @@
-# fleet-captain
-Captain of the Fleet (CoreOS)
+# AWS CoreOS management scripts
