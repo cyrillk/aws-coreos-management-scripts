@@ -12,12 +12,14 @@ function call {
   TUNNEL="FLEETCTL_TUNNEL=$IP"
 
   local MACHINES
-  MACHINES=$(env $TUNNEL fleetctl list-machines -l -no-legend -fields machine | head -n 1)
+  MACHINES=$(env $TUNNEL fleetctl list-machines -l -no-legend -fields machine)
+
+  printf "Cluster %s\n" "$CLUSTER_ID"
+  printf "%32s\n" | tr ' ' =
 
   for MACHINE_ID in $MACHINES; do
-    printf "Cluster %s\n" "$CLUSTER_ID"
-    printf "%32s\n" | tr ' ' =
-    env $TUNNEL fleetctl ssh $MACHINE_ID "etcdctl cluster-health"
+    printf "\nMachine %s\n" "$MACHINE_ID"
+    env $TUNNEL fleetctl ssh "$MACHINE_ID" "docker ps --format '{{.Image}}\t{{.Names}}\t{{.RunningFor}} ago\t{{.Status}}'"
   done
 }
 

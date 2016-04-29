@@ -1,9 +1,10 @@
 #!/bin/bash
+set -euo pipefail
+readonly IFS=$'\n\t'
 
 readonly args=("$@")
-
-readonly AWS_KEY=${args[0]}
-readonly AWS_SECRET_KEY=${args[1]}
+readonly AWS_KEY="${args[0]}"
+readonly AWS_SECRET_KEY="${args[1]}"
 
 if [ -z "$AWS_KEY" ]; then
    echo "Missing 'AWS key' parameter"
@@ -25,20 +26,22 @@ function call {
   TUNNEL="FLEETCTL_TUNNEL=$IP"
 
   local MACHINES
-  MACHINES=$(env $TUNNEL fleetctl list-machines | cut -d'.' -f1 | awk 'NR>1' | head -n 1)
+  MACHINES=$(env $TUNNEL fleetctl list-machines -l -no-legend -fields machine | head -n 1)
 
   for MACHINE_ID in $MACHINES; do
-    printf '\n'
-    echo "Cluster $CLUSTER_ID"
-    printf '%32s\n' | tr ' ' =
+    printf "Cluster %s\n" "$CLUSTER_ID"
+    printf "%32s\n" | tr ' ' =
     env $TUNNEL fleetctl ssh $MACHINE_ID "etcdctl set /efset/services/secrets/aws/access_key $AWS_KEY 1> /dev/null"
     env $TUNNEL fleetctl ssh $MACHINE_ID "etcdctl set /efset/services/secrets/aws/secret_access_key $AWS_SECRET_KEY 1> /dev/null"
-    echo "Updated.."
+    echo "$MACHINE_ID updated.."
   done
 }
 
 readonly CLUSTERS=$(aws ec2 describe-instances | jq ".Reservations[].Instances[].Tags[] | select(.Key | contains(\"cluster_id\")) | .Value" | sort | uniq | sed 's/\"//g')
 
+printf "\n"
+
 for ID in $CLUSTERS; do
   call $ID
+  printf "\n"
 done
