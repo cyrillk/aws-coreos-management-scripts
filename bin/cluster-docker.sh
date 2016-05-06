@@ -19,7 +19,7 @@ function call {
 
   for MACHINE_ID in $MACHINES; do
     printf "\nMachine %s\n" "$MACHINE_ID"
-    env $TUNNEL fleetctl ssh "$MACHINE_ID" "docker ps --format '{{.Image}}\t{{.Names}}\t{{.RunningFor}} ago\t{{.Status}}'"
+    env $TUNNEL fleetctl ssh "$MACHINE_ID" "docker ps -a --format '{{.Image}}\t{{.Names}}\t{{.RunningFor}} ago\t{{.Status}}'"
   done
 }
 
